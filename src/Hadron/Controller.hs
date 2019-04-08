@@ -590,6 +590,7 @@ writeState
     -> FilePath
     -> m ()
 writeState settings runToken  = do
+    liftIO $ hPutStrLn stderr "Inside writeState..."
     remote <- hdfsTempFilePath settings runToken
     let local = LocalFile runToken
 

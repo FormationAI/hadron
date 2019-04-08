@@ -77,6 +77,7 @@ import           Data.Conduit.Binary          (sourceFile)
 import           Data.Text                    (Text)
 import           System.Directory
 import           System.FilePath.Posix
+import           System.IO
 -------------------------------------------------------------------------------
 import           Hadron.Run.FanOut
 import qualified Hadron.Run.Hadoop            as H
@@ -141,8 +142,12 @@ hdfsLs rc fp = case rc of
 -------------------------------------------------------------------------------
 hdfsPut :: RunContext -> L.LocalFile -> FilePath -> IO ()
 hdfsPut rc f1 f2 = case rc of
-    LocalRun lrs -> L.runLocal lrs (L.hdfsPut f1 (LocalFile f2))
-    HadoopRun e _ -> withLocalFile rc f1 $ \ lf -> H.hdfsPut e lf f2
+    LocalRun lrs -> do
+      hPutStrLn stderr "hdfsPut operational layer branching to LocalRun"
+      L.runLocal lrs (L.hdfsPut f1 (LocalFile f2))
+    HadoopRun e _ -> do
+      hPutStrLn stderr "hdfsPut operational layer branching to HadoopRun"
+      withLocalFile rc f1 $ \ lf -> H.hdfsPut e lf f2
 
 
 -------------------------------------------------------------------------------

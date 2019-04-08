@@ -357,8 +357,12 @@ parseLS pat out = filter isOK $ map clean $ mapMaybe parseLs $ lines out
 -------------------------------------------------------------------------------
 -- | Copy file from a location to a location
 hdfsPut :: HadoopEnv -> FilePath -> FilePath -> IO ()
-hdfsPut HadoopEnv{..} localPath hdfsPath = void $
-    rawSystem _hsBin ["fs", "-put", localPath, hdfsPath]
+hdfsPut HadoopEnv{..} localPath hdfsPath = void $ do
+    hPutStrLn stderr $ "in hdfsPut: localPath = " ++ localPath ++ " and hdfsPath = " ++ hdfsPath
+    ec <- rawSystem _hsBin ["fs", "-put", localPath, hdfsPath]
+    case ec of
+      ExitFailure i -> exitWith ec
+      ExitSuccess -> return ()
 
 
 -------------------------------------------------------------------------------
