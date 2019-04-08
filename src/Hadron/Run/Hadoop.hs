@@ -358,12 +358,16 @@ parseLS pat out = filter isOK $ map clean $ mapMaybe parseLs $ lines out
 -- | Copy file from a location to a location
 hdfsPut :: HadoopEnv -> FilePath -> FilePath -> IO ()
 hdfsPut HadoopEnv{..} localPath hdfsPath = void $ do
-    hPutStrLn stderr $ "in hdfsPut: localPath = " ++ localPath ++ " and hdfsPath = " ++ hdfsPath
-    ec <- rawSystem _hsBin ["fs", "-put", localPath, hdfsPath]
-    case ec of
-      ExitFailure i -> exitWith ec
-      ExitSuccess -> return ()
-
+    hPutStrLn stderr $ "in hdfsPut: localPath = " ++ localPath ++ " and hdfsPath = " ++ hdfsPath ++ " and hdfsPath ^. directory = " ++ (hdfsPath ^. directory)
+    dieIfFailed $ hadoop ["fs", "-mkdir", "-p", hdfsPath ^. directory]
+    dieIfFailed $ hadoop ["fs", "-put", localPath, hdfsPath]
+  where
+    hadoop args = rawSystem _hsBin args
+    dieIfFailed mec = do
+      ec <- mec
+      case ec of
+        ExitFailure i -> exitWith ec
+        ExitSuccess -> return ()
 
 -------------------------------------------------------------------------------
 -- | Create a new multiple output file manager.
