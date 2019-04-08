@@ -891,9 +891,11 @@ orchestrate (Controller p) settings rr s = do
               -- serialize current state to HDFS, to be read by
               -- individual mappers reducers of this step.
               runToken <- liftIO $ randomToken 64
-
+              liftIO . hPutStrLn stderr $
+                "Calling writeState " ++ (show runToken)
               writeState settings runToken
-
+              liftIO . hPutStrLn stderr $
+                "Done with writeState <settings> " ++ (show runToken)
               let mrs = mrOptsToRunOpts mro
               launchMapReduce settings mrKey runToken $ mrs
                 & mrsInput .~ concatMap _tapLocation inp
