@@ -357,9 +357,10 @@ parseLS pat out = filter isOK $ map clean $ mapMaybe parseLs $ lines out
 -------------------------------------------------------------------------------
 -- | Copy file from a location to a location
 hdfsPut :: HadoopEnv -> FilePath -> FilePath -> IO ()
-hdfsPut HadoopEnv{..} localPath hdfsPath = void $
-    rawSystem _hsBin ["fs", "-put", localPath, hdfsPath]
-
+hdfsPut HadoopEnv{..} localPath hdfsPath = void $ do
+    let hadoop = rawSystem _hsBin
+    hadoop ["fs", "-mkdir", "-p", hdfsPath ^. directory]
+    hadoop ["fs", "-put", localPath, hdfsPath]
 
 -------------------------------------------------------------------------------
 -- | Create a new multiple output file manager.
